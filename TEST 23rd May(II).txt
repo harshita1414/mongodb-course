@@ -1,0 +1,205 @@
+TEST 23rd May
+
+Q1. List the Employee Name, their Department Name, and the Location Name for all employees.
+Ans-
+SELECT 
+    e.employee_name,
+    d.dept_name,
+    d.location_id
+FROM Employees e
+JOIN Departments d
+    ON e.dept_id = d.dept_id;
+
+Q2. Retrieve the Project Name, Client Name, and the Total Hours Worked on that project, but only for projects managed by the 'Consulting' department.
+Ans-
+SELECT 
+    p.project_name,
+    p.client_name,
+    SUM(a.hours_worked) AS total_hours
+FROM Projects p
+JOIN Assignments a
+    ON p.project_id = a.project_id
+JOIN Departments d
+    ON p.dept_id = d.dept_id
+WHERE d.dept_name = 'Consulting'
+GROUP BY p.project_name, p.client_name;
+
+Q3. Find the names of Employees who have worked on a project with Client Name 'GlobalTech Solutions'.
+Ans-
+SELECT 
+    e.employee_name,
+    p.project_name
+FROM Employees e
+JOIN Assignments a
+    ON e.employee_id = a.employee_id
+JOIN Projects p
+    ON a.project_id = p.project_id
+WHERE p.client_name = 'GlobalTech Solutions';
+
+Q4. List all Departments that have no Employees currently assigned to them.
+Ans-
+SELECT 
+    d.dept_name
+FROM Departments d
+LEFT JOIN Employees e
+    ON d.dept_id = e.dept_id
+WHERE e.employee_id IS NULL;
+
+Q5. Show the Manager Name, the Department Name they manage, and the total number of direct reports they have.
+Ans-
+SELECT 
+    m.employee_name AS manager_name,
+    d.dept_name,
+    COUNT(e.employee_id) AS total_reports
+FROM Employees e
+JOIN Employees m
+    ON e.manager_id = m.employee_id
+JOIN Departments d
+    ON m.dept_id = d.dept_id
+GROUP BY m.employee_name, d.dept_name;
+
+Q6. Calculate the Average Hours Worked per Employee across all projects.
+Ans-
+SELECT 
+    e.employee_name,
+    AVG(a.hours_worked) AS average_hours
+FROM Employees e
+JOIN Assignments a
+    ON e.employee_id = a.employee_id
+GROUP BY e.employee_name;
+
+Q7. Find the Department Name(s) that have an average salary above the company-wide average salary.
+Ans-
+SELECT 
+    d.dept_name
+FROM Employees e
+JOIN Departments d
+    ON e.dept_id = d.dept_id
+GROUP BY d.dept_name
+HAVING AVG(e.salary) > (
+    SELECT AVG(salary)
+    FROM Employees
+);
+
+Q8. Identify the Client Name(s) whose projects have a total combined hours worked exceeding 500 hours.
+Ans-
+SELECT 
+    p.client_name,
+    SUM(a.hours_worked) AS total_hours
+FROM Projects p
+JOIN Assignments a
+    ON p.project_id = a.project_id
+GROUP BY p.client_name
+HAVING SUM(a.hours_worked) > 500;
+
+Q9. For each Location, find the Department Name with the highest count of employees.
+Ans-
+SELECT 
+    d.location_id,
+    d.dept_name,
+    COUNT(e.employee_id) AS employee_count
+FROM Departments d
+JOIN Employees e
+    ON d.dept_id = e.dept_id
+GROUP BY d.location_id, d.dept_name
+ORDER BY employee_count DESC;
+
+Q10. Calculate the total number of employees assigned to each Project, but only include projects that have more than 5 employees assigned.
+Ans-
+SELECT 
+    p.project_name,
+    COUNT(DISTINCT a.employee_id) AS total_employees
+FROM Projects p
+JOIN Assignments a
+    ON p.project_id = a.project_id
+GROUP BY p.project_name
+HAVING COUNT(DISTINCT a.employee_id) > 5;
+
+Q11. Find the Employee Name(s) who work on ALL projects managed by the 'R&D' department.
+Ans-
+SELECT e.employee_name
+FROM Employees e
+WHERE NOT EXISTS (
+    SELECT p.project_id
+    FROM Projects p
+    JOIN Departments d
+        ON p.dept_id = d.dept_id
+    WHERE d.dept_name = 'R&D'
+    AND NOT EXISTS (
+        SELECT *
+        FROM Assignments a
+        WHERE a.employee_id = e.employee_id
+        AND a.project_id = p.project_id
+    )
+);
+
+
+Q14. Find the Project Name(s) that have no assigned employees.
+Ans-
+SELECT 
+    p.project_name
+FROM Projects p
+LEFT JOIN Assignments a
+    ON p.project_id = a.project_id
+WHERE a.assignment_id IS NULL;
+
+
+Q16. Find the Employee Name and their oldest project start date.
+Ans-SELECT 
+    e.employee_name,
+    MIN(a.start_date) AS oldest_project_date
+FROM Employees e
+JOIN Assignments a
+    ON e.employee_id = a.employee_id
+GROUP BY e.employee_name;
+
+
+Q17. List all projects that were active in the year 2023 using DATE_FORMAT.
+Ans-
+SELECT 
+    project_name,
+    start_date
+FROM Projects
+WHERE DATE_FORMAT(start_date, '%Y') = '2023';
+
+
+Q18. Use IFNULL function to display CEO instead of NULL manager.
+Ans-
+SELECT 
+    employee_name,
+    IFNULL(CAST(manager_id AS CHAR), 'CEO') AS manager
+FROM Employees;
+
+
+Q20. Display the Project Name and a status ("High Activity" if total hours > 300, "Normal" otherwise) using the CASE statement.
+Ans-
+SELECT 
+    p.project_name,
+    CASE
+        WHEN SUM(a.hours_worked) > 300 THEN 'High Activity'
+        ELSE 'Normal'
+    END AS status
+FROM Projects p
+LEFT JOIN Assignments a
+    ON p.project_id = a.project_id
+GROUP BY p.project_name;
+
+
+Q21. List the Employee Name and their Manager's Name, even if the employee has no manager.
+Ans-
+SELECT 
+    e.employee_name AS employee,
+    m.employee_name AS manager
+FROM Employees e
+LEFT JOIN Employees m
+    ON e.manager_id = m.employee_id;
+
+
+
+
+
+
+
+
+
+
